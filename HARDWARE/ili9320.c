@@ -183,9 +183,9 @@ u16 LCD_ReadReg(u8 LCD_Reg)
   ClrRd
   SetRd
   data = LCD_Read(); 
- SetCs
+  SetCs
     
- return    data;
+ return data;
 }
 
 u16 LCD_ReadSta(void)
@@ -946,8 +946,21 @@ void ili9320_SetPoint(u16 x,u16 y,u16 point)
   //if ( (x>320)||(y>240) ) return;
   ili9320_SetCursor(x,y);
 
-  LCD_WriteRAM_Prepare();
-  LCD_WriteRAM(point);
+  //LCD_WriteRAM_Prepare();
+  ClrCs
+  ClrRs
+  ClrWr
+  LCD_Write(R34);
+  SetWr
+  //SetCs
+
+  //LCD_WriteRAM(point);
+  //ClrCs
+  SetRs
+  ClrWr
+  LCD_Write(point);
+  SetWr
+  SetCs
 }
 
 /****************************************************************************
@@ -1048,17 +1061,25 @@ void ili9320_DrawPicture(u16 StartX,u16 StartY,u16 EndX,u16 EndY,u16 *pic)
 }
 #endif 
 
-void ili9320_ShowString(u16 x,u16 y,u16 width,u16 height,u8 size,u8 *p)
+void ili9320_ShowString(u16 x,u16 y,u16 width,u16 height,u8 size, u8 *p)
 {         
 	u8 x0=x;
 	width+=x;
 	height+=y;
-    while((*p<='~')&&(*p>=' '))//判断是不是非法字符!
+    while(*p != '\0') // 判断是不是非法字符! (*p<='~')&&(*p>=' ')
     {       
         if(x>=width){x=x0;y+=size;}
         if(y>=height)break;//退出
-        ili9320_PutChar_16x24(x,y,*p, Red, Blue);
-        x+=size/2;
+        if (size <= 8)
+        {
+          ili9320_PutChar(x, y, *p, Red, Blue);
+          x += 8;  //size/2;
+        }
+        else
+        {
+          ili9320_PutChar_16x24(x,y,*p, Red, Blue);
+          x += 16;  //size/2;
+        }
         p++;
     }  
 }
@@ -1132,7 +1153,6 @@ void ili9320_PutChar(u16 x,u16 y,u8 c,u16 charColor,u16 bkColor)  // Lihao
 ****************************************************************************/
 void ili9320_PutChar_16x24(u16 x,u16 y,u8 c,u16 charColor,u16 bkColor)
 {
-
   u16 i=0;
   u16 j=0;
   

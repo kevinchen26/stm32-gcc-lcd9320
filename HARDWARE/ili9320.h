@@ -12,30 +12,34 @@
 #define ID_AM  110
 
 //硬件相关的子函数
+// GPIOA->BSRR = GPIO_Pin_2; // set bit 
+// GPIOA->BRR = GPIO_Pin_3;  // reset bit
 
-#define Lcd_Light_ON  GPIO_SetBits(LCD_PORT_BL, LCD_Pin_BL); 
-#define Lcd_Light_OFF GPIO_ResetBits(LCD_PORT_BL, LCD_Pin_BL);
+#define Lcd_Light_ON  LCD_PORT_BL->BSRR = LCD_Pin_BL;   //GPIO_SetBits(LCD_PORT_BL, LCD_Pin_BL); 
+#define Lcd_Light_OFF LCD_PORT_BL->BRR = LCD_Pin_BL;   //GPIO_ResetBits(LCD_PORT_BL, LCD_Pin_BL);
 
-#define SetCs  GPIO_SetBits(LCD_PORT_CS, LCD_Pin_CS);
-#define ClrCs  GPIO_ResetBits(LCD_PORT_CS, LCD_Pin_CS);
+#define SetCs  LCD_PORT_CS->BSRR = LCD_Pin_CS;       //GPIO_SetBits(LCD_PORT_CS, LCD_Pin_CS);
+#define ClrCs  LCD_PORT_CS->BRR =  LCD_Pin_CS;       //GPIO_ResetBits(LCD_PORT_CS, LCD_Pin_CS);
  
+#define SetWr  LCD_PORT_WR->BSRR = LCD_Pin_WR;       //GPIO_SetBits(LCD_PORT_WR, LCD_Pin_WR);
+#define ClrWr  LCD_PORT_WR->BRR =  LCD_Pin_WR;       //GPIO_ResetBits(LCD_PORT_WR, LCD_Pin_WR);
 
-#define SetWr  GPIO_SetBits(LCD_PORT_WR, LCD_Pin_WR);
-#define ClrWr  GPIO_ResetBits(LCD_PORT_WR, LCD_Pin_WR);
+#define SetRs  LCD_PORT_RS->BSRR = LCD_Pin_RS;       //GPIO_SetBits(LCD_PORT_RS, LCD_Pin_RS);
+#define ClrRs  LCD_PORT_RS->BRR =  LCD_Pin_RS;       //GPIO_ResetBits(LCD_PORT_RS, LCD_Pin_RS);
 
-#define SetRs  GPIO_SetBits(LCD_PORT_RS, LCD_Pin_RS);
-#define ClrRs  GPIO_ResetBits(LCD_PORT_RS, LCD_Pin_RS);
-
-#define SetRd  GPIO_SetBits(LCD_PORT_RD, LCD_Pin_RD);
-#define ClrRd  GPIO_ResetBits(LCD_PORT_RD, LCD_Pin_RD);
+#define SetRd  LCD_PORT_RD->BSRR = LCD_Pin_RD;       //GPIO_SetBits(LCD_PORT_RD, LCD_Pin_RD);
+#define ClrRd  LCD_PORT_RD->BRR =  LCD_Pin_RD;       //GPIO_ResetBits(LCD_PORT_RD, LCD_Pin_RD);
 
 
 #define LCD_Write(LCD_DATA)  {\
-							  GPIO_Write(GPIOC, ((GPIOC->ODR&0XFF00)|(LCD_DATA&0x00FF)));\
-							  GPIO_Write(GPIOB, ((GPIOB->ODR&0X00FF)|(LCD_DATA&0xFF00)));\
+                              GPIOC->ODR = ((GPIOC->ODR & 0xFF00) | (LCD_DATA & 0x00FF)); \
+                              GPIOB->ODR = ((GPIOB->ODR & 0x00FF) | (LCD_DATA & 0xFF00)); \
                              }	   //数据输出	
+        // GPIO_Write(GPIOC, ((GPIOC->ODR&0XFF00)|(LCD_DATA&0x00FF)));\
+        // GPIO_Write(GPIOB, ((GPIOB->ODR&0X00FF)|(LCD_DATA&0xFF00)));
 
-#define LCD_Read()  (GPIO_ReadInputData(GPIOB)&0XFF00)|(GPIO_ReadInputData(GPIOC)&0X00FF)	  //数据输入
+//#define LCD_Read()  (GPIO_ReadInputData(GPIOB)&0XFF00)|(GPIO_ReadInputData(GPIOC)&0X00FF)	   //数据输入
+#define LCD_Read()  ((GPIOB->IDR & 0xFF00) | (GPIOC->IDR & 0x00FF))
 ////////////////////////////////////////////////////////////////////////////////////////
 /* LCD Control pins */
 #define LCD_Pin_BL      GPIO_Pin_12

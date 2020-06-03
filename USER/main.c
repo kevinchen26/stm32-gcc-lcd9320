@@ -14,8 +14,10 @@
 //广州市星翼电子科技有限公司
  int main(void)
  {		
-	char loop[] = "Loop-00000\r\n";
-    int16_t i = 0;
+	char loop[] = "000.00 \0";
+    uint16_t i = 65500;
+	uint16_t sec = 0, nCount = 10;
+	__IO  u32 TimingDelay; 
 
 	GPIO_InitTypeDef  GPIO_InitStructure;
 	delay_init();	    	 //延时函数初始化	  
@@ -39,26 +41,49 @@
 	ili9320_Initializtion();
 	ili9320_Clear(Blue);
 
-	ili9320_ShowString(20, 40, 320, 240, 24, "ili9320 LCD Display.");
-
+	ili9320_ShowString(10, 10, 320, 240, 24, "ili9320 LCD DISPLAY 16x24.");
+	ili9320_ShowString(10, 80, 320, 240, 8, "ili9320 LCD DISPLAY 8 x 16.");
+	ili9320_ShowString(20, 120, 320, 240, 24, "Loop-");
 	while(1)
 	{
-		GPIO_SetBits(GPIOA, GPIO_Pin_2);
-		GPIO_ResetBits(GPIOA, GPIO_Pin_3);
-		delay_ms(500);
-		GPIO_SetBits(GPIOA,GPIO_Pin_3);
-		GPIO_ResetBits(GPIOA,GPIO_Pin_2);
-		delay_ms(500);
+		//delay_ms(10);
+		nCount = 10;
+		sec = i / 10;
+		if (sec & 0x01)
+		{
+			//GPIO_SetBits(GPIOA, GPIO_Pin_2);
+			//GPIO_ResetBits(GPIOA, GPIO_Pin_3);
+			GPIOA->BSRR = GPIO_Pin_2;
+			GPIOA->BRR = GPIO_Pin_3;
+		}
+		else
+		{
+			//GPIO_SetBits(GPIOA,GPIO_Pin_3);
+			//GPIO_ResetBits(GPIOA,GPIO_Pin_2);
+			GPIOA->BSRR = GPIO_Pin_3;
+			GPIOA->BRR = GPIO_Pin_2;
+		}
 
 		i++;
-		loop[5] = '0' + i / 10000;
-		loop[6] = '0' + (i % 10000) / 1000;
-		loop[7] = '0' + (i % 1000) / 100;
-		loop[8] = '0' + (i % 100) / 10;
-		loop[9] = '0' + i % 10;
-		USART1_printf(loop);
-		ili9320_ShowString(20, 80, 320, 240, 24, loop);
-
+		loop[0] = '0' + (i / 10000);
+		loop[1] = '0' + ((i % 10000) / 1000);
+		loop[2] = '0' + ((i % 1000) / 100);
+		loop[4] = '0' + ((i % 100) / 10);
+		loop[5] = '0' + (i % 10);
+		//USART1_printf(loop);
+		//USART1_printf("\r\n");
+		if (i > 10000)
+		{
+			ili9320_ShowString(100, 120, 320, 240, 8, loop);
+		}
+		else if (i > 1000)
+		{
+			ili9320_ShowString(108, 120, 320, 240, 8, (loop + 1));
+		}
+		else
+		{
+			ili9320_ShowString(116, 120, 320, 240, 8, (loop + 2));
+		}
 	}
  }
 
