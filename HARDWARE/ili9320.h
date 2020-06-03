@@ -35,7 +35,7 @@
                               GPIOC->ODR = ((GPIOC->ODR & 0xFF00) | (LCD_DATA & 0x00FF)); \
                               GPIOB->ODR = ((GPIOB->ODR & 0x00FF) | (LCD_DATA & 0xFF00)); \
                              }	   //数据输出	
-        // GPIO_Write(GPIOC, ((GPIOC->ODR&0XFF00)|(LCD_DATA&0x00FF)));\
+        // GPIO_Write(GPIOC, ((GPIOC->ODR&0XFF00)|(LCD_DATA&0x00FF)));
         // GPIO_Write(GPIOB, ((GPIOB->ODR&0X00FF)|(LCD_DATA&0xFF00)));
 
 //#define LCD_Read()  (GPIO_ReadInputData(GPIOB)&0XFF00)|(GPIO_ReadInputData(GPIOC)&0X00FF)	   //数据输入

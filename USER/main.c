@@ -4,9 +4,44 @@
 #include "usart.h"
 //#include "lcd.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "ili9320.h"
 
-#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+// #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)		//KEIL C
+
+int _write(int fd, char *ptr, int len)
+{
+    int i = 0;
+
+    /*
+     * write "len" of char from "ptr" to file id "fd"
+     * Return number of char written.
+     *
+    * Only work for STDOUT, STDIN, and STDERR
+     */
+    if (fd > 2)
+    {
+        return -1;
+    }
+
+    while (*ptr && (i < len))
+    {
+        //usart_send_blocking(USART1, *ptr);
+		USART_SendData(USART1, *ptr);
+		while (USART_GetFlagStatus(USART1, USART_FLAG_TC)  == RESET)
+		{
+			/* code */
+		}
+        // if (*ptr == '\n')
+        // {
+        //     usart_send_blocking(USART1, '\r');
+        // }
+        i++;
+        ptr++;
+    }
+    return i;
+}
+// https://blog.csdn.net/zhengyangliu123/java/article/details/54966402
 
 //ALIENTEK战舰STM32开发板实验1
 //跑马灯实验  
@@ -48,8 +83,8 @@
 	{
 		//delay_ms(10);
 		nCount = 10;
-		sec = i / 10;
-		if (sec & 0x01)
+		//sec = i / 100;
+		if (sec == i / 100)
 		{
 			//GPIO_SetBits(GPIOA, GPIO_Pin_2);
 			//GPIO_ResetBits(GPIOA, GPIO_Pin_3);
@@ -58,10 +93,20 @@
 		}
 		else
 		{
+			sec = i / 100;
 			//GPIO_SetBits(GPIOA,GPIO_Pin_3);
 			//GPIO_ResetBits(GPIOA,GPIO_Pin_2);
 			GPIOA->BSRR = GPIO_Pin_3;
 			GPIOA->BRR = GPIO_Pin_2;
+
+			/*methord1*/
+			printf("Enter the delay(ms) constant for blink : ");
+			printf("printf seconde line.");
+			fflush(stdout);
+			/*methord2*/
+			printf("Error: expected a delay > 0\r\n");
+
+			printf("Loop-%d\r\n", i);
 		}
 
 		i++;
@@ -72,6 +117,7 @@
 		loop[5] = '0' + (i % 10);
 		//USART1_printf(loop);
 		//USART1_printf("\r\n");
+
 		if (i > 10000)
 		{
 			ili9320_ShowString(100, 120, 320, 240, 8, loop);
@@ -87,12 +133,12 @@
 	}
  }
 
-PUTCHAR_PROTOTYPE
-{
-	USART_SendData(USART1, (uint8_t) ch);
-	while (USART_GetFlagStatus(USART1, USART_FLAG_TC)  == RESET)
-	{
-		/* code */
-	}
-	return ch;	
-}
+// PUTCHAR_PROTOTYPE
+// {
+// 	USART_SendData(USART1, (uint8_t) ch);
+// 	while (USART_GetFlagStatus(USART1, USART_FLAG_TC)  == RESET)
+// 	{
+// 		/* code */
+// 	}
+// 	return ch;	
+// }
